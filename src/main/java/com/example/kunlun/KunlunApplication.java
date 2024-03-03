@@ -23,12 +23,6 @@ public class KunlunApplication {
     @Bean
     public CommandLineRunner initData(UserRepository userRepository) {
         return args -> {
-            User newUser = new User();
-            newUser.setUsername("wangwu");
-            newUser.setPassword("$2a$10$xfFCRLYxY50dEwSP8ZklYOux2BJl/HabSVxwtpBb4YuMs7RW4jsYy"); // 注意：实际使用时应加密密码
-            newUser.setEnabled(true);
-            userRepository.save(newUser);
-
             // 然后尝试检索
             userRepository.findByUsername("wangwu")
                     .ifPresent(user -> System.out.println("User found: " + user.getUsername()));
