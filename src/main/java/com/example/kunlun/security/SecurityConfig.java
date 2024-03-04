@@ -1,13 +1,16 @@
 package com.example.kunlun.security;
 
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -16,25 +19,38 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/", "/static/**","/login","/perform_login" ,"/favicon.ico","/error").permitAll()  // 允许所有用户访问首页和静态资源
-                        .anyRequest().authenticated()  // 所有其他请求都需要认证
+                        .requestMatchers("/", "/static/**", "/login","/login/oauth2/code/gitlab", "/perform_login", "/favicon.ico", "/error", "/webjars/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                        .loginPage("/login")  // 指定自定义登录页面URL
-                        .loginProcessingUrl("/perform_login")  // 指定处理登录请求的URL
-                        .defaultSuccessUrl("/welcome", true)  // 登录成功后重定向到首页
-                        .failureUrl("/login?error=true")  // 登录失败后重定向到登录页面
-                        .permitAll()  // 允许所有用户访问登录页面
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
+                        .defaultSuccessUrl("/welcome", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
                 )
                 .logout((logout) -> logout
-                        .logoutUrl("/perform_logout")  // 指定处理登出请求的URL
-                        .logoutSuccessUrl("/login?logout=true")  // 登出成功后重定向到登录页面
-                        .deleteCookies("JSESSIONID")  // 删除JSESSIONID cookie
-                        .permitAll()  // 允许所有用户访问登出页面
-                ); // 使用自定义的UserDetailsService加载用户信息
-
+                        .logoutUrl("/perform_logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .oauth2Login((oauth2) -> oauth2
+                        .loginPage("/login")  // 可选，如果您想要一个自定义的登录页面
+                        .defaultSuccessUrl("/welcome", true)
+                        .failureUrl("/login?error=true")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService())
+                        )
+                );
         return http.build();
     }
+
+    @Bean
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService() {
+        return new CustomOAuth2UserService();
+    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -15,25 +15,28 @@
         h1 {
             color: #333;
         }
-        .login-form {
+        .login-form, .oauth2-login {
             margin-top: 20px;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], button, .oauth2-button {
             margin: 10px 0;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        input[type="submit"] {
-            padding: 10px 20px;
+        button, .oauth2-button {
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
+        button:hover, .oauth2-button:hover {
             background-color: #0056b3;
+        }
+        .oauth2-button {
+            background-color: #fc6d26; /* GitLab颜色 */
+            border-color: #e64a19;
         }
     </style>
 </head>
@@ -50,7 +53,11 @@
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <button type="submit">登录</button>
         </form>
+    </div>
 
+    <!-- GitLab单点登录按钮 -->
+    <div class="oauth2-login">
+        <a href="/oauth2/authorization/gitlab" class="oauth2-button">使用GitLab登录</a>
     </div>
 </div>
 </body>
